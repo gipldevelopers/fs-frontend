@@ -1,8 +1,14 @@
 // lib/api.js - Updated with better token management
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.trim() ||
-  "https://fs-backend-ep9h.onrender.com" ||
-  "http://localhost:5000";
+// api.js
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export async function fetchData(endpoint) {
+  const res = await fetch(`${API_BASE_URL}${endpoint}`);
+  if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`);
+  return res.json();
+}
+
 
 class ApiService {
   constructor() {
