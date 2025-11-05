@@ -196,7 +196,7 @@ export default function Navbar() {
                     ? 'bg-[#1f8fce] border-[#1f8fce] text-white' // Active style
                     : isScrolled 
                       ? 'bg-[#1f8fce] border-[#1f8fce] text-white hover:bg-transparent hover:border-[#1f8fce] hover:text-[#1f8fce]'
-                      : 'bg-white/20 border-white text-white hover:bg-white hover:text-[#1f8fce] backdrop-blur-sm'
+                      : 'bg-white/20 border-white text-white hover:bg-white hover:text-white backdrop-blur-sm'
                 }`}
               >
                 <span className={`absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease ${
