@@ -99,7 +99,7 @@ export default function AboutSection() {
           <div className="relative order-2 lg:order-1">
             <div className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-2xl">
               <Image
-                src="/images/portrait-male-female-security-operator-while-working-data-system-control-room-offices-technical-operator-working-workstation-with-multiple-displays-security-guard-working-multiple_530697-63871 (1).jpg"
+                src="/images/about-section.jpg"
                 alt="Security Operators Working in Control Room"
                 width={600}
                 height={400}

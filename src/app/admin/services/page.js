@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { tokenManager } from '../../utils/token';
+import Image from 'next/image';
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -201,7 +202,7 @@ export default function Services() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Icon</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Image</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Title</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Description</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -211,7 +212,21 @@ export default function Services() {
                 {filteredServices.map((service) => (
                   <tr key={service.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <span className="text-2xl">{service.icon || '🛡️'}</span>
+                      <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-gray-100">
+                        {service.image_url ? (
+                          <Image
+                            src={service.image_url}
+                            alt={service.title}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-gray-400 text-lg">🛡️</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-medium text-gray-900">{service.title}</span>

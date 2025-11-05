@@ -188,6 +188,31 @@ class ApiService {
     return this.request("health");
   }
 
+// Visitor methods
+async incrementVisitorCount() {
+  return this.request("api/visitors/increment", {
+    method: "POST",
+  });
+}
+
+async getVisitorStats() {
+  return this.request("api/visitors/stats");
+}
+
+async getTodayVisitorCount() {
+  return this.request("api/visitors/today");
+}
+
+async getAllVisitorData() {
+  return this.request("api/visitors/all");
+}
+
+async resetVisitorCounts() {
+  return this.request("api/visitors/reset", {
+    method: "DELETE",
+  });
+}
+
   // Services methods
   async getAdminServices() {
     return this.request("api/services");

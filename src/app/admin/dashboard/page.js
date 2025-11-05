@@ -11,7 +11,12 @@ export default function Dashboard() {
     gallery: 0,
     contacts: 0
   });
-  const [recentActivities, setRecentActivities] = useState([]);
+  const [visitorStats, setVisitorStats] = useState({
+    today: 0,
+    yesterday: 0,
+    total: 0,
+    last7Days: []
+  });
   const [systemStatus, setSystemStatus] = useState({});
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState('checking');
@@ -20,10 +25,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData();
     
-    // Set up interval to refresh activities every 20 seconds
+    // Set up interval to refresh visitor stats every 30 seconds
     const interval = setInterval(() => {
-      fetchRecentActivities();
-    }, 20000);
+      fetchVisitorStats();
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -51,7 +56,7 @@ export default function Dashboard() {
       // Fetch all data in parallel
       await Promise.all([
         fetchStats(),
-        fetchRecentActivities(),
+        fetchVisitorStats(),
         fetchSystemStatus()
       ]);
 
@@ -80,18 +85,30 @@ export default function Dashboard() {
     }
   };
 
-  const fetchRecentActivities = async () => {
+  const fetchVisitorStats = async () => {
     try {
-      const activitiesResponse = await apiService.getRecentActivities();
-      if (activitiesResponse && activitiesResponse.success) {
-        console.log(`✅ Loaded ${activitiesResponse.data.length} recent activities`);
-        setRecentActivities(activitiesResponse.data);
+      const visitorResponse = await apiService.getVisitorStats();
+      if (visitorResponse && visitorResponse.success) {
+        console.log(`✅ Loaded visitor stats: Today=${visitorResponse.data.today}, Total=${visitorResponse.data.total}`);
+        setVisitorStats(visitorResponse.data);
       } else {
-        setRecentActivities(getDemoActivities());
+        // No demo data - just set empty stats
+        setVisitorStats({
+          today: 0,
+          yesterday: 0,
+          total: 0,
+          last7Days: []
+        });
       }
     } catch (error) {
-      console.log('Recent activities failed, using demo data');
-      setRecentActivities(getDemoActivities());
+      console.log('Visitor stats failed');
+      // No demo data - just set empty stats
+      setVisitorStats({
+        today: 0,
+        yesterday: 0,
+        total: 0,
+        last7Days: []
+      });
     }
   };
 
@@ -122,7 +139,7 @@ export default function Dashboard() {
       console.log('Fallback dashboard also failed');
     }
 
-    // If all else fails, use demo data
+    // If all else fails, use demo data for main stats only
     setStats({
       services: 5,
       blogs: 3,
@@ -140,171 +157,14 @@ export default function Dashboard() {
       gallery: 12,
       contacts: 15,
     });
-    setRecentActivities(getDemoActivities());
+    // No demo data for visitor stats
+    setVisitorStats({
+      today: 0,
+      yesterday: 0,
+      total: 0,
+      last7Days: []
+    });
     setSystemStatus({ database: 'connected', tables: 15, api: 'online' });
-  };
-
-  const getDemoActivities = () => [
-    {
-      id: 1,
-      type: 'service',
-      title: 'New service created: Home Security System',
-      description: 'Service added to the system',
-      time: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-      status: 'created',
-      action: 'view',
-      link: '/admin/services'
-    },
-    {
-      id: 2,
-      type: 'blog',
-      title: 'New blog created: Security Tips 2024',
-      description: 'Status: published',
-      time: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-      status: 'published',
-      action: 'edit',
-      link: '/admin/blogs'
-    },
-    {
-      id: 3,
-      type: 'testimonial',
-      title: 'New testimonial: Jane Smith',
-      description: 'Status: approved',
-      time: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-      status: 'approved',
-      action: 'review',
-      link: '/admin/testimonials'
-    },
-    {
-      id: 4,
-      type: 'gallery',
-      title: 'New image uploaded',
-      description: 'security-camera-installation.jpg',
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      status: 'uploaded',
-      action: 'view',
-      link: '/admin/gallery'
-    },
-    {
-      id: 5,
-      type: 'contact',
-      title: 'New contact form: John Doe',
-      description: 'Status: new',
-      time: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-      status: 'new',
-      action: 'view',
-      link: '/admin/contact'
-    },
-    {
-      id: 6,
-      type: 'service',
-      title: 'Service updated: CCTV Installation',
-      description: 'Service updated in the system',
-      time: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      status: 'updated',
-      action: 'view',
-      link: '/admin/services'
-    }
-  ];
-
-  const formatTime = (timestamp) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInMinutes = (now - time) / (1000 * 60);
-    const diffInHours = diffInMinutes / 60;
-    const diffInDays = diffInHours / 24;
-
-    if (diffInMinutes < 1) {
-      return 'Just now';
-    } else if (diffInMinutes < 60) {
-      return `${Math.floor(diffInMinutes)} minutes ago`;
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)} hours ago`;
-    } else {
-      return `${Math.floor(diffInDays)} days ago`;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'new':
-      case 'created':
-      case 'uploaded':
-        return 'bg-blue-500';
-      case 'published':
-      case 'approved':
-        return 'bg-green-500';
-      case 'updated':
-        return 'bg-purple-500';
-      case 'pending':
-      case 'draft':
-        return 'bg-amber-500';
-      case 'deleted':
-        return 'bg-red-500';
-      case 'read':
-        return 'bg-gray-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'new':
-        return 'New';
-      case 'created':
-        return 'Created';
-      case 'published':
-        return 'Published';
-      case 'approved':
-        return 'Approved';
-      case 'updated':
-        return 'Updated';
-      case 'uploaded':
-        return 'Uploaded';
-      case 'pending':
-        return 'Pending';
-      case 'draft':
-        return 'Draft';
-      case 'deleted':
-        return 'Deleted';
-      case 'read':
-        return 'Read';
-      default:
-        return status;
-    }
-  };
-
-  const getActionText = (action) => {
-    switch (action) {
-      case 'view':
-        return 'View';
-      case 'edit':
-        return 'Edit';
-      case 'review':
-        return 'Review';
-      default:
-        return 'View';
-    }
-  };
-
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'service':
-        return '🛡️';
-      case 'blog':
-        return '📝';
-      case 'testimonial':
-        return '⭐';
-      case 'gallery':
-        return '🖼️';
-      case 'contact':
-        return '📧';
-      case 'system':
-        return '⚙️';
-      default:
-        return '📋';
-    }
   };
 
   const statCards = [
@@ -442,17 +302,17 @@ export default function Dashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Recent Activities */}
+        {/* Visitor Statistics */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">Recent Activities</h2>
+              <h2 className="text-xl font-semibold text-gray-800">Website Visitors</h2>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-500">
-                  Auto-refresh in 20s
+                  Auto-refresh in 30s
                 </span>
                 <button 
-                  onClick={fetchRecentActivities}
+                  onClick={fetchVisitorStats}
                   className="text-blue-500 hover:text-blue-600 font-medium text-sm"
                 >
                   Refresh
@@ -461,57 +321,59 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
-            {recentActivities.length > 0 ? (
-              recentActivities.map((activity) => (
-                <div 
-                  key={activity.id} 
-                  className="p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-all duration-200 bg-white"
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="text-lg mt-1">
-                      {getTypeIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold text-gray-800 text-sm leading-tight">
-                          {activity.title}
-                        </h3>
-                        <span className={`${getStatusColor(activity.status)} text-white text-xs px-2 py-1 rounded-full whitespace-nowrap`}>
-                          {getStatusText(activity.status)}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mb-2">
-                        {activity.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">
-                          {formatTime(activity.time)}
-                        </span>
-                        {activity.link && (
-                          <Link 
-                            href={activity.link}
-                            className="text-xs text-blue-500 hover:text-blue-600 font-medium"
-                          >
-                            {getActionText(activity.action)} →
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-3xl font-bold text-blue-600 mb-1">
+                  {visitorStats.today}
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No recent activities found</p>
-                <button 
-                  onClick={fetchRecentActivities}
-                  className="mt-2 text-blue-500 hover:text-blue-600 text-sm"
-                >
-                  Check for new activities
-                </button>
+                <div className="text-sm text-gray-600">Today</div>
               </div>
-            )}
+              <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-3xl font-bold text-green-600 mb-1">
+                  {visitorStats.yesterday}
+                </div>
+                <div className="text-sm text-gray-600">Yesterday</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="text-3xl font-bold text-purple-600 mb-1">
+                  {visitorStats.total}
+                </div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+            </div>
+            
+            {/* Simple bar chart for last 7 days */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Last 7 Days</h3>
+              {visitorStats.last7Days && visitorStats.last7Days.length > 0 ? (
+                <div className="space-y-2">
+                  {visitorStats.last7Days.map((day, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="text-xs text-gray-500 w-16">
+                        {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                      <div className="flex-1 bg-gray-200 rounded-full h-4">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full"
+                          style={{ 
+                            width: `${Math.max((day.count / Math.max(...visitorStats.last7Days.map(d => d.count || 1)) * 100), 5)}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700 w-8">
+                        {day.count}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  <p>No visitor data available yet</p>
+                  <p className="text-sm">Visitor counts will appear as people visit your website</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

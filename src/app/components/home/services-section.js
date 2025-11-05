@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { apiService } from '@/app/lib/api';
+import Image from 'next/image';
 
 // Animation variants
 const containerVariants = {
@@ -400,9 +401,6 @@ export default function ServicesSection() {
 
 // ServiceCard component - Responsive
 const ServiceCard = ({ service, cardsPerView, generateSlug }) => {
-  // Use the actual icon from the database, fallback to default if not available
-  const serviceIcon = service.icon || '🛡️';
-
   return (
     <motion.div
       whileHover={{ 
@@ -416,8 +414,21 @@ const ServiceCard = ({ service, cardsPerView, generateSlug }) => {
       className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4 sm:p-6 hover:shadow-2xl transition-shadow duration-300 cursor-pointer shadow-lg flex flex-col h-full"
     >
       <div className="flex flex-col h-full">
-        <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">
-          {serviceIcon}
+        {/* Service Image */}
+        <div className="relative w-full h-32 mb-3 sm:mb-4 rounded-lg overflow-hidden">
+          {service.image_url ? (
+            <Image
+              src={service.image_url}
+              alt={service.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full bg-white/20 flex items-center justify-center rounded-lg">
+              <span className="text-white text-2xl">🛡️</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2 py-2 sm:py-4 flex-1">

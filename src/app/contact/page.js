@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Shield, Lock, Eye } from 'lucide-react';
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { verifyRecaptcha } from '@/app/lib/recaptcha';
 
-// Animation variants (No Change)
+// Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -45,7 +47,7 @@ const highlightVariants = {
   }
 };
 
-// Split text into letters for animation (No Change)
+// Split text into letters for animation
 const splitText = (text) => {
   return text.split('').map((char, index) => (
     <motion.span
@@ -58,7 +60,7 @@ const splitText = (text) => {
   ));
 };
 
-// Animated Title Component (No Change)
+// Animated Title Component
 const AnimatedTitle = () => {
   const title = "Contact Our Security Experts";
   const highlight = "Security";
@@ -85,7 +87,7 @@ const AnimatedTitle = () => {
   );
 };
 
-// Modern Security Contact Illustration - REVISED CONTENT
+// Modern Security Contact Illustration
 const SecurityContactIllustration = () => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
@@ -98,7 +100,7 @@ const SecurityContactIllustration = () => (
       {/* Main Illustration Container */}
       <div className="relative flex flex-col items-center justify-center h-full py-4 sm:py-6">
         
-        {/* Animated Security Shield - Responsive (No Change) */}
+        {/* Animated Security Shield - Responsive */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           whileInView={{ scale: 1, rotate: 0 }}
@@ -286,7 +288,7 @@ const SecurityContactIllustration = () => (
           </motion.div>
         </motion.div>
 
-        {/* Security Status Banner (No Change) */}
+        {/* Security Status Banner */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -311,13 +313,13 @@ const SecurityContactIllustration = () => (
         </motion.div>
       </div>
 
-      {/* Background Pattern (No Change) */}
+      {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 opacity-5">
         <div className="absolute top-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-[#1f8fce] rounded-full blur-2xl sm:blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-[#10b981] rounded-full blur-2xl sm:blur-3xl"></div>
       </div>
 
-      {/* Custom CSS for shield point (No Change) */}
+      {/* Custom CSS for shield point */}
       <style jsx>{`
         .clip-shield-point {
           clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
@@ -327,7 +329,8 @@ const SecurityContactIllustration = () => (
   </motion.div>
 );
 
-export default function ContactPage() {
+// Contact Form Component with reCAPTCHA
+const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -338,53 +341,266 @@ export default function ContactPage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [recaptchaError, setRecaptchaError] = useState('');
+  
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  // Initialize reCAPTCHA
+  useEffect(() => {
+    if (executeRecaptcha) {
+      console.log('✅ reCAPTCHA loaded successfully');
+    } else {
+      console.log('🔄 reCAPTCHA loading...');
+    }
+  }, [executeRecaptcha]);
 
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
+    // Clear reCAPTCHA error when user starts typing
+    if (recaptchaError) {
+      setRecaptchaError('');
+    }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  
-  try {
-    const response = await fetch('http://localhost:5000/api/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setRecaptchaError('');
+    
+    try {
+      // Verify reCAPTCHA
+      if (!executeRecaptcha) {
+        throw new Error('reCAPTCHA not loaded. Please refresh the page.');
+      }
 
-    const result = await response.json();
+      console.log('🔄 Getting reCAPTCHA token...');
+      const token = await executeRecaptcha('contact_form_submit');
+      
+      if (!token) {
+        throw new Error('Failed to get reCAPTCHA token');
+      }
 
-    if (response.ok) {
-      setIsSubmitted(true);
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
+      console.log('✅ reCAPTCHA token received');
+
+      // Verify token with backend
+      console.log('🔄 Verifying reCAPTCHA token...');
+      const recaptchaResult = await verifyRecaptcha(token);
+      
+      if (!recaptchaResult.success) {
+        throw new Error(recaptchaResult.error || 'reCAPTCHA verification failed');
+      }
+
+      console.log('✅ reCAPTCHA verification successful, score:', recaptchaResult.score);
+
+      // Proceed with form submission
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-    } else {
-      alert(result.error || 'Failed to send message. Please try again.');
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        alert(result.error || 'Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      console.error('❌ Error submitting form:', error);
+      if (error.message.includes('reCAPTCHA')) {
+        setRecaptchaError(error.message);
+      } else {
+        alert('Network error. Please check your connection and try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    alert('Network error. Please check your connection and try again.');
-  } finally {
-    setIsSubmitting(false);
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="text-center py-8 sm:py-12 h-full flex flex-col justify-center">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+        >
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <Send className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+          </div>
+        </motion.div>
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+          Message Sent!
+        </h3>
+        <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
+          Thank you for contacting us. Our security experts will get back to you within 24 hours.
+        </p>
+        <button
+          onClick={() => setIsSubmitted(false)}
+          className="bg-[#1f8fce] text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-[#167aac] transition-colors duration-300 cursor-pointer text-sm sm:text-base"
+        >
+          Send Another Message
+        </button>
+      </div>
+    );
   }
-};
 
   return (
+    <div className="h-full flex flex-col">
+      <div>
+        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+          Send Us a Message
+        </h3>
+        <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
+          Have questions about our security services? We&apos;re here to help.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 lg:space-y-8 flex-grow">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+          <div>
+            <label htmlFor="name" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              placeholder="Enter your full name"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="email" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              placeholder="Enter your email address"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+          <div>
+            <label htmlFor="phone" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              placeholder="Enter your phone number"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="subject" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
+              Subject *
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              required
+              value={formData.subject}
+              onChange={handleChange}
+              className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              placeholder="Enter message subject"
+            />
+          </div>
+        </div>
+
+        <div className="flex-grow">
+          <label htmlFor="message" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
+            Your Message *
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={4}
+            value={formData.message}
+            onChange={handleChange}
+            className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 resize-none text-sm sm:text-base"
+            placeholder="Tell us about your security needs and how we can assist you..."
+          />
+        </div>
+
+        {/* reCAPTCHA Error Message */}
+        {recaptchaError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-red-600 text-sm">{recaptchaError}</p>
+            <p className="text-red-500 text-xs mt-1">
+              Please refresh the page and try again.
+            </p>
+          </div>
+        )}
+
+        {/* reCAPTCHA Notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-blue-600 text-xs">
+            <Shield className="w-3 h-3 inline mr-1" />
+            This site is protected by reCAPTCHA and the Google 
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline ml-1">Privacy Policy</a> and
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline ml-1">Terms of Service</a> apply.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-gradient-to-r from-[#1f8fce] to-[#1a1a5e] text-white py-3 sm:py-4 lg:py-5 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base lg:text-lg hover:from-[#167aac] hover:to-[#141452] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg cursor-pointer"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>Sending...</span>
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Send Message</span>
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// Main Contact Page Component
+const ContactPageContent = () => {
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Header Section (No Change) */}
+      {/* Header Section */}
       <section className="relative pt-6 pb-4 sm:pt-16 sm:pb-12 lg:pt-24 lg:pb-16 xl:pt-32 xl:pb-24 h-[35vh] xs:h-[40vh] sm:min-h-[50vh] lg:min-h-[60vh] xl:min-h-[70vh] bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce] overflow-hidden flex flex-col justify-center">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
@@ -442,7 +658,7 @@ const handleSubmit = async (e) => {
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 xl:gap-12">
             
-            {/* Left Column - Security Contact Illustration (Uses Revised Component) */}
+            {/* Left Column - Security Contact Illustration */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -455,7 +671,7 @@ const handleSubmit = async (e) => {
               </div>
             </motion.div>
 
-            {/* Right Column - Contact Form (No Change) */}
+            {/* Right Column - Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -464,152 +680,14 @@ const handleSubmit = async (e) => {
               className="flex items-stretch"
             >
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 lg:p-8 w-full">
-                {isSubmitted ? (
-                  <div className="text-center py-8 sm:py-12 h-full flex flex-col justify-center">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200 }}
-                    >
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                        <Send className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                      </div>
-                    </motion.div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                      Message Sent!
-                    </h3>
-                    <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                      Thank you for contacting us. Our security experts will get back to you within 24 hours.
-                    </p>
-                    <button
-                      onClick={() => setIsSubmitted(false)}
-                      className="bg-[#1f8fce] text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:bg-[#167aac] transition-colors duration-300 cursor-pointer text-sm sm:text-base"
-                    >
-                      Send Another Message
-                    </button>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col">
-                    <div>
-                      <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                        Send Us a Message
-                      </h3>
-                      <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
-                        Have questions about our security services? We&apos;re here to help.
-                      </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 lg:space-y-8 flex-grow">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                        <div>
-                          <label htmlFor="name" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
-                            Full Name *
-                          </label>
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            required
-                            value={formData.name}
-                            onChange={handleChange}
-                            className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
-                            // Removed placeholder="John Doe"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="email" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
-                            // Removed placeholder="john@example.com"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                        <div>
-                          <label htmlFor="phone" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
-                            Phone Number
-                          </label>
-                          <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
-                            // Removed placeholder="+1 (555) 123-4567"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="subject" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
-                            Subject *
-                          </label>
-                          <input
-                            type="text"
-                            id="subject"
-                            name="subject"
-                            required
-                            value={formData.subject}
-                            onChange={handleChange}
-                            className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 text-sm sm:text-base"
-                            // Removed placeholder="How can we help you?"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex-grow">
-                        <label htmlFor="message" className="block text-xs sm:text-sm lg:text-base font-medium text-gray-700 mb-1">
-                          Your Message *
-                        </label>
-                        <textarea
-                          id="message"
-                          name="message"
-                          required
-                          rows={4}
-                          value={formData.message}
-                          onChange={handleChange}
-                          className="w-full text-gray-700 px-3 sm:px-4 py-2 sm:py-3 lg:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1f8fce] focus:border-transparent transition-all duration-300 resize-none text-sm sm:text-base"
-                          // Removed placeholder="Tell us about your security needs and how we can assist you..."
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-gradient-to-r from-[#1f8fce] to-[#1a1a5e] text-white py-3 sm:py-4 lg:py-5 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base lg:text-lg hover:from-[#167aac] hover:to-[#141452] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg cursor-pointer"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            <span>Sending...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                            <span>Send Message</span>
-                          </>
-                        )}
-                      </button>
-                    </form>
-                  </div>
-                )}
+                <ContactForm />
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Full Width Map Section (No Change) */}
+      {/* Full Width Map Section */}
       <section className="w-full">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -632,5 +710,22 @@ const handleSubmit = async (e) => {
         </motion.div>
       </section>
     </div>
+  );
+};
+
+// Main Export with reCAPTCHA Provider
+export default function ContactPage() {
+  return (
+    <GoogleReCaptchaProvider
+      reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+      scriptProps={{
+        async: true,
+        defer: true,
+        appendTo: 'head',
+        nonce: undefined,
+      }}
+    >
+      <ContactPageContent />
+    </GoogleReCaptchaProvider>
   );
 }

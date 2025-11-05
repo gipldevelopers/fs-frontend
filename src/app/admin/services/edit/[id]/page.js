@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { tokenManager } from '../../../../utils/token';
+import Image from 'next/image';
 
 export default function EditService() {
   const router = useRouter();
@@ -13,7 +14,6 @@ export default function EditService() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    icon: '',
     features: [''],
     key_benefits: [''],
     implementation_process: [''],
@@ -21,6 +21,10 @@ export default function EditService() {
     seo_description: '',
     seo_keywords: ''
   });
+
+  const [serviceImage, setServiceImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
 
   useEffect(() => {
     // Check authentication on component mount
@@ -97,7 +101,6 @@ export default function EditService() {
       setFormData({
         title: service.title || '',
         description: service.description || '',
-        icon: service.icon || '',
         features: parseArrayField(service.features),
         key_benefits: parseArrayField(service.key_benefits),
         implementation_process: parseArrayField(service.implementation_process),
@@ -105,6 +108,12 @@ export default function EditService() {
         seo_description: service.seo_description || '',
         seo_keywords: service.seo_keywords || ''
       });
+
+      // Set current image
+      if (service.image_url) {
+        setCurrentImageUrl(service.image_url);
+        setImagePreview(service.image_url);
+      }
     } catch (error) {
       console.error('Error fetching service:', error);
       setError(error.message || 'Failed to load service data. Please check if the service exists.');
@@ -131,22 +140,28 @@ export default function EditService() {
       const filteredBenefits = formData.key_benefits.filter(item => item.trim() !== '');
       const filteredProcess = formData.implementation_process.filter(item => item.trim() !== '');
 
-      const serviceData = {
-        title: formData.title,
-        description: formData.description,
-        icon: formData.icon,
-        features: filteredFeatures,
-        key_benefits: filteredBenefits,
-        implementation_process: filteredProcess,
-        seo_title: formData.seo_title,
-        seo_description: formData.seo_description,
-        seo_keywords: formData.seo_keywords
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('features', JSON.stringify(filteredFeatures));
+      formDataToSend.append('key_benefits', JSON.stringify(filteredBenefits));
+      formDataToSend.append('implementation_process', JSON.stringify(filteredProcess));
+      formDataToSend.append('seo_title', formData.seo_title);
+      formDataToSend.append('seo_description', formData.seo_description);
+      formDataToSend.append('seo_keywords', formData.seo_keywords);
+
+      // Append image if selected
+      if (serviceImage) {
+        formDataToSend.append('service_image', serviceImage);
+      }
 
       const response = await fetch(`http://localhost:5000/api/services/${params.id}`, {
         method: 'PUT',
-        headers: tokenManager.getAuthHeaders(),
-        body: JSON.stringify(serviceData)
+        headers: {
+          'Authorization': `Bearer ${tokenManager.getToken()}`
+        },
+        body: formDataToSend
       });
 
       if (response.status === 401) {
@@ -196,6 +211,26 @@ export default function EditService() {
         [fieldName]: newArray
       });
     }
+  };
+
+  // Handle image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setServiceImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setServiceImage(null);
+    setImagePreview(currentImageUrl || '');
   };
 
   // Auto-generate SEO fields based on title
@@ -268,32 +303,63 @@ export default function EditService() {
                 />
               </div>
               
+              {/* Service Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Service Icon
+                  Service Image
                 </label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="📹 (emoji)"
-                />
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  <span className="text-sm text-gray-500">Popular icons:</span>
-                  {['📹', '🔑', '👮', '🚨', '🔥', '🔒', '📊', '🎫', '🏠', '🏢', '🛡️', '📱'].map((icon) => (
+                
+                {/* Image Preview */}
+                {imagePreview && (
+                  <div className="mb-4 relative">
+                    <div className="w-32 h-32 relative rounded-lg overflow-hidden border border-gray-300">
+                      <Image
+                        src={imagePreview}
+                        alt="Service preview"
+                        fill
+                        className="object-cover"
+                        sizes="128px"
+                      />
+                    </div>
                     <button
-                      key={icon}
                       type="button"
-                      onClick={() => setFormData({ ...formData, icon })}
-                      className={`text-lg p-1 rounded transition-colors ${
-                        formData.icon === icon ? 'bg-blue-100 border border-blue-300' : 'hover:bg-gray-100'
-                      }`}
+                      onClick={removeImage}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 text-xs"
                     >
-                      {icon}
+                      ×
                     </button>
-                  ))}
+                  </div>
+                )}
+                
+                {/* File Input */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  <input
+                    type="file"
+                    id="service_image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="service_image"
+                    className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {imagePreview ? 'Change Image' : 'Choose Service Image'}
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    JPG, PNG, WEBP (Max 5MB)
+                  </p>
                 </div>
+
+                {/* Current Image info */}
+                {currentImageUrl && !serviceImage && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Current image: {currentImageUrl.split('/').pop()}
+                  </p>
+                )}
               </div>
             </div>
 

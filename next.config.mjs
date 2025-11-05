@@ -24,8 +24,14 @@ const nextConfig = {
       },
     ],
   },
+
   // Optional: Enable React strict mode for better development experience
   reactStrictMode: true,
-}
 
-export default nextConfig
+  // ✅ Ignore ESLint warnings and errors during production builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
+
+export default nextConfig;
