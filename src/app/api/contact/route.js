@@ -10,7 +10,11 @@ async function verifyRecaptchaToken(token) {
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     if (!secretKey) {
       console.warn('⚠️ RECAPTCHA_SECRET_KEY not set, skipping verification');
-      return { success: true }; // Allow in development
+      // In production, we should fail if secret key is not set
+      if (process.env.NODE_ENV === 'production') {
+        return { success: false, error: 'reCAPTCHA configuration error' };
+      }
+      return { success: true }; // Allow in development only
     }
 
     const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
@@ -23,14 +27,38 @@ async function verifyRecaptchaToken(token) {
 
     const data = await response.json();
     
+    // Log detailed error information for debugging
+    if (!data.success) {
+      console.error('❌ reCAPTCHA verification failed:', {
+        success: data.success,
+        'error-codes': data['error-codes'],
+        challenge_ts: data.challenge_ts,
+        hostname: data.hostname,
+      });
+    }
+    
     if (data.success) {
       return { success: true, score: data.score };
     } else {
-      return { success: false, error: 'reCAPTCHA verification failed' };
+      // Provide more detailed error message
+      const errorCodes = data['error-codes'] || [];
+      let errorMessage = 'reCAPTCHA verification failed';
+      
+      if (errorCodes.includes('invalid-input-secret')) {
+        errorMessage = 'Invalid reCAPTCHA secret key. Please check your environment variables.';
+      } else if (errorCodes.includes('invalid-input-response')) {
+        errorMessage = 'Invalid reCAPTCHA token. Please try again.';
+      } else if (errorCodes.includes('timeout-or-duplicate')) {
+        errorMessage = 'reCAPTCHA token expired. Please refresh and try again.';
+      } else if (errorCodes.length > 0) {
+        errorMessage = `reCAPTCHA error: ${errorCodes.join(', ')}`;
+      }
+      
+      return { success: false, error: errorMessage, errorCodes };
     }
   } catch (error) {
     console.error('reCAPTCHA verification error:', error);
-    return { success: false, error: 'Failed to verify reCAPTCHA' };
+    return { success: false, error: 'Failed to verify reCAPTCHA. Please try again.' };
   }
 }
 
@@ -57,8 +85,18 @@ export async function POST(request) {
 
     const recaptchaResult = await verifyRecaptchaToken(recaptchaToken);
     if (!recaptchaResult.success) {
+      console.error('❌ reCAPTCHA verification failed:', {
+        error: recaptchaResult.error,
+        errorCodes: recaptchaResult.errorCodes,
+        hasSecretKey: !!process.env.RECAPTCHA_SECRET_KEY,
+        environment: process.env.NODE_ENV,
+      });
+      
       return NextResponse.json(
-        { error: recaptchaResult.error || 'reCAPTCHA verification failed' },
+        { 
+          error: recaptchaResult.error || 'reCAPTCHA verification failed',
+          details: process.env.NODE_ENV === 'development' ? recaptchaResult.errorCodes : undefined
+        },
         { status: 400 }
       );
     }
