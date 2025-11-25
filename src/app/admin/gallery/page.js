@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -165,9 +166,11 @@ export default function AdminGalleryPage() {
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden rounded-t-lg">
                   {image.image_url ? (
-                    <img
+                    <Image
                       src={image.image_url}
                       alt={image.image_name || 'Gallery image'}
+                      width={400}
+                      height={400}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         e.target.style.display = 'none';
@@ -242,9 +245,11 @@ export default function AdminGalleryPage() {
                 </button>
                 
                 {/* Image */}
-                <img
+                <Image
                   src={selectedImage.image_url}
                   alt={selectedImage.image_name || 'Preview'}
+                  width={1200}
+                  height={800}
                   className="max-w-full max-h-[80vh] object-contain rounded-lg"
                 />
                 

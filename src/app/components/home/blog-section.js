@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { apiService } from '@/app/lib/api';
@@ -87,9 +88,11 @@ const BlogCard = ({ post, index }) => {
       
       {/* Image Container with Link */}
       <Link href={`/blogs/${post.slug}`} className="block relative h-48 sm:h-56 md:h-64 overflow-hidden flex-shrink-0">
-        <img
+        <Image
           src={post.featured_image_url || post.image || '/api/placeholder/400/250'}
           alt={post.title}
+          width={400}
+          height={250}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </Link>

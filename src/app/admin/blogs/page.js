@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   Plus, 
@@ -313,9 +314,11 @@ export default function AdminBlogsPage() {
                   {/* Featured Image */}
                   <div className="h-48 bg-gray-200 rounded-t-lg overflow-hidden relative">
                     {blog.featured_image_url ? (
-                      <img
+                      <Image
                         src={blog.featured_image_url}
                         alt={blog.title}
+                        width={400}
+                        height={192}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.style.display = 'none';

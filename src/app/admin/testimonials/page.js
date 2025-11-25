@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   Plus, 
@@ -214,12 +215,14 @@ export default function AdminTestimonialsPage() {
                 <div className="p-6">
                   {/* Header with avatar and info */}
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border border-gray-200 relative">
                       {testimonial.avatar_url ? (
-                        <img
+                        <Image
                           src={testimonial.avatar_url}
                           alt={testimonial.name}
-                          className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">

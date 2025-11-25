@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { apiService } from "@/app/lib/api";
 
 // Animation variants
 const containerVariants = {
@@ -55,6 +55,64 @@ const splitText = (text) => {
   ));
 };
 
+// Static Testimonials Data
+const staticTestimonials = [
+  {
+    id: 1,
+    name: "Rajesh Patel",
+    position: "CEO",
+    company: "Gujarat Industries Ltd.",
+    content: "Forever Security Services has been protecting our industrial facility for over 3 years. Their professional approach and 24/7 vigilance give us complete peace of mind. Highly recommended!",
+    rating: 4,
+    image_url: null
+  },
+  {
+    id: 2,
+    name: "Priya Sharma",
+    position: "Property Manager",
+    company: "Luxury Residences",
+    content: "The residential security team is exceptional. They're always alert, courteous, and professional. Our residents feel safe and secure. Thank you for your outstanding service!",
+    rating: 5,
+    image_url: null
+  },
+  {
+    id: 3,
+    name: "Amit Kumar",
+    position: "Store Owner",
+    company: "Retail Chain",
+    content: "Since implementing Forever Security's retail security solutions, we've seen a significant reduction in theft and shrinkage. Their store detectives are highly trained and effective.",
+    rating: 3,
+    image_url: null
+  },
+  {
+    id: 4,
+    name: "Sneha Desai",
+    position: "Event Coordinator",
+    company: "Event Management Co.",
+    content: "We've used Forever Security for multiple corporate events and weddings. Their team is professional, discreet, and handles crowd control perfectly. They make our events run smoothly.",
+    rating: 5,
+    image_url: null
+  },
+  {
+    id: 5,
+    name: "Vikram Mehta",
+    position: "Director",
+    company: "Tech Solutions Inc.",
+    content: "The tech-driven security solutions have transformed our office security. The AI-powered surveillance and access control systems are top-notch. Excellent service and support!",
+    rating: 3,
+    image_url: null
+  },
+  {
+    id: 6,
+    name: "Anjali Joshi",
+    position: "Facility Manager",
+    company: "Corporate Park",
+    content: "Forever Security provides comprehensive security for our corporate park. Their executive protection services are outstanding, and the team is always responsive to our needs.",
+    rating: 4,
+    image_url: null
+  }
+];
+
 // Animated Title Component
 const AnimatedTitle = () => {
   const title = "Hear It From Our Valued Clients"; // REVISED TITLE
@@ -97,9 +155,7 @@ const AnimatedTitle = () => {
 };
 
 export default function TestimonialPage() {
-  const [testimonials, setTestimonials] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [testimonials] = useState(staticTestimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autorotate, setAutorotate] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -107,60 +163,6 @@ export default function TestimonialPage() {
   const [cardsPerView, setCardsPerView] = useState(1);
   const carouselRef = useRef(null);
   const autorotateTiming = 5000;
-
-  // Fetch testimonials from API
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
-
-  const fetchTestimonials = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await apiService.getTestimonials();
-
-      if (response.success) {
-        // Handle different response structures
-        let testimonialsData = [];
-
-        if (Array.isArray(response.data)) {
-          testimonialsData = response.data;
-        } else if (response.data && Array.isArray(response.data.testimonials)) {
-          testimonialsData = response.data.testimonials;
-        } else if (response.data && Array.isArray(response.data.data)) {
-          testimonialsData = response.data.data;
-        }
-
-        if (testimonialsData.length === 0) {
-          setTestimonials([]);
-        } else {
-          // Filter only approved testimonials if the field exists
-          const approvedTestimonials = testimonialsData.filter(
-            (testimonial) => {
-              // Check different possible field names for approval status
-              const isApproved =
-                testimonial.is_active === true ||
-                testimonial.is_active === 1 ||
-                testimonial.status === "approved" ||
-                testimonial.status === "active" ||
-                testimonial.approved === true;
-
-              return isApproved;
-            }
-          );
-
-          setTestimonials(approvedTestimonials);
-        }
-      } else {
-        setError(response.error || "Failed to load testimonials");
-      }
-    } catch (error) {
-      setError("Failed to load testimonials: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Update cards per view based on screen size
   useEffect(() => {
@@ -232,9 +234,8 @@ export default function TestimonialPage() {
       {[...Array(5)].map((_, i) => (
         <Star
           key={i}
-          className={`w-4 h-4 sm:w-5 sm:h-5 ${
-            i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
-          } mr-1`}
+          className={`w-4 h-4 sm:w-5 sm:h-5 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            } mr-1`}
         />
       ))}
     </div>
@@ -246,11 +247,11 @@ export default function TestimonialPage() {
     if (!src) {
       const initials = name
         ? name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .substring(0, 2)
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .substring(0, 2)
         : "CU";
       return (
         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#1f8fce] flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
@@ -262,10 +263,12 @@ export default function TestimonialPage() {
     }
 
     return (
-      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden mr-3 sm:mr-4 flex-shrink-0">
-        <img
+      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden mr-3 sm:mr-4 flex-shrink-0 relative">
+        <Image
           src={src}
           alt={alt}
+          width={64}
+          height={64}
           className="w-full h-full object-cover"
           onError={(e) => {
             // If image fails to load, show initials
@@ -273,11 +276,11 @@ export default function TestimonialPage() {
             const parent = e.target.parentElement;
             const initials = alt
               ? alt
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .substring(0, 2)
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .substring(0, 2)
               : "CU";
             parent.innerHTML = `
               <div class="w-full h-full bg-[#1f8fce] flex items-center justify-center">
@@ -358,98 +361,6 @@ export default function TestimonialPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          {/* Loading Header */}
-          <div className="flex flex-col lg:flex-row items-center justify-between mb-8 sm:mb-12">
-            <div className="lg:w-1/2 mb-6 lg:mb-0 text-center lg:text-left">
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-gray-300 rounded w-full"></div>
-                <div className="h-4 bg-gray-300 rounded w-5/6 mt-2"></div>
-              </div>
-            </div>
-
-            <div className="lg:w-1/2 flex justify-center lg:justify-end mt-4 lg:mt-0">
-              <div className="flex space-x-3 sm:space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-300 animate-pulse"></div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-300 animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Loading Carousel */}
-          <div className="relative overflow-hidden">
-            <div className="flex py-2 sm:py-4">
-              {[1, 2].map((item) => (
-                <div
-                  key={item}
-                  className="flex-shrink-0 px-2 sm:px-3"
-                  style={{
-                    width: `${cardWidthPercentage}%`,
-                    minWidth: `${cardWidthPercentage}%`,
-                  }}
-                >
-                  <div className="flex flex-col h-full bg-white p-4 sm:p-6 rounded-xl shadow-md animate-pulse">
-                    <div className="h-6 bg-gray-300 rounded w-32 mb-4"></div>
-                    <div className="h-4 bg-gray-300 rounded w-full mb-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-5/6 mb-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-4/6 mb-6"></div>
-                    <div className="flex items-center mt-auto">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full mr-3"></div>
-                      <div>
-                        <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                        <div className="h-3 bg-gray-300 rounded w-16"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            Testimonials
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">{error}</p>
-          <button
-            onClick={fetchTestimonials}
-            className="bg-[#1f8fce] text-white px-6 py-3 rounded-lg hover:bg-[#167aac] transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (testimonials.length === 0) {
-    return (
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            Customer Testimonials
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            No testimonials available yet. Check back later to see what our
-            customers are saying about our services.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -552,11 +463,10 @@ export default function TestimonialPage() {
                   setCurrentIndex(index);
                   setAutorotate(false);
                 }}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${index === currentIndex
                     ? "bg-[#1f8fce] scale-125"
                     : "bg-gray-300 hover:bg-gray-400"
-                }`}
+                  }`}
                 aria-label={`Go to testimonial ${index + 1}`}
               />
             ))}

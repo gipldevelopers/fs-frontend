@@ -33,6 +33,7 @@ export default function EditService() {
       return;
     }
     fetchService();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, router]);
 
   const fetchService = async () => {

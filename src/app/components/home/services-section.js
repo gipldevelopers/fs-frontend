@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { apiService } from '@/app/lib/api';
 import Image from 'next/image';
 
 // Animation variants
@@ -61,6 +60,52 @@ const splitText = (text) => {
   ));
 };
 
+// Static Services Data
+const staticServices = [
+  {
+    id: 1,
+    title: "Commercial & Industrial Security",
+    description: "We provide reliable and efficient commercial security solutions that safeguard offices...",
+    image_url: "/services-image/commercial-services.jpg"
+  },
+  {
+    id: 2,
+    title: "Corporate Security",
+    description: "In today's high-stakes corporate landscape, businesses are constantly challenged by threats ranging from unauthorized access and...",
+    image_url: "/services-image/corporate-services.jpg"
+  },
+  {
+    id: 3,
+    title: "Residential Security",
+    description: "Round-the-clock residential security designed to protect what matters most — your family, your property, and your peace of mind...",
+    image_url: "/services-image/residential-services.jpg"
+  },
+  {
+    id: 4,
+    title: "Retail Security",
+    description: "Protecting your retail space with professional security solutions that deter theft, ensure safety, and enhance customer confidence... ",
+    image_url: "/services-image/retail-services.jpg"
+  },
+  {
+    id: 5,
+    title: "Event & Private Security",
+    description: "From corporate functions to private celebrations, we provide highly trained professionals to ensure your guests enjoy a secure...",
+    image_url: "/services-image/event-services.jpg"
+  },
+  {
+    id: 6,
+    title: "Specialized Security",
+    description: "Expert security tailored for high-risk, sensitive, or VIP environments—delivering precision, professionalism, and protection where it..",
+    image_url: "/services-image/specialized-services.jpg"
+  },
+  {
+    id: 7,
+    title: "Tech-Driven Security",
+    description: "Technology-powered security solutions combining smart surveillance, automation, and real-time response to keep your assets...",
+    image_url: "/services-image/tech-driven-services.jpg"
+  }
+];
+
 // Animated Title Component
 const AnimatedTitle = () => {
   const title = "Our Security Services";
@@ -94,40 +139,13 @@ const AnimatedTitle = () => {
 };
 
 export default function ServicesSection() {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [services] = useState(staticServices);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsPerView, setCardsPerView] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const carouselRef = useRef(null);
   const autorotateTiming = 5000;
-
-  // Fetch services from API
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await apiService.getAdminServices();
-      
-      if (response.success) {
-        setServices(response.data);
-      } else {
-        setError(response.error || 'Failed to load services');
-      }
-    } catch (error) {
-      console.error('💥 Error fetching services:', error);
-      setError('Failed to load services');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Update cards per view based on screen size
   useEffect(() => {
@@ -193,99 +211,7 @@ export default function ServicesSection() {
   };
 
   // Duplicate services for seamless infinite loop
-  const duplicatedServices = services.length > 0 ? [...services, ...services, ...services] : [];
-
-  if (loading) {
-    return (
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <div className="animate-pulse">
-              <div className="h-8 bg-white/20 rounded w-64 mx-auto mb-4"></div>
-              <div className="h-4 bg-white/20 rounded w-80 mx-auto"></div>
-            </div>
-          </div>
-
-          {/* Loading Carousel */}
-          <div className="relative overflow-hidden">
-            <div className="flex py-2 sm:py-4">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="flex-shrink-0 px-2 sm:px-3"
-                  style={{ 
-                    width: `${cardWidthPercentage}%`,
-                    minWidth: `${cardWidthPercentage}%`
-                  }}
-                >
-                  <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4 sm:p-6 shadow-lg flex flex-col h-full animate-pulse">
-                    <div className="h-12 bg-white/20 rounded w-12 mb-4"></div>
-                    <div className="h-6 bg-white/20 rounded w-3/4 mb-3"></div>
-                    <div className="h-4 bg-white/20 rounded w-full mb-2"></div>
-                    <div className="h-4 bg-white/20 rounded w-5/6 mb-4"></div>
-                    <div className="h-10 bg-white/20 rounded w-32 mt-auto"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="w-2 h-2 sm:w-3 sm:h-3 bg-white/20 rounded-full"></div>
-            ))}
-          </div>
-
-          <div className="text-center mt-8 sm:mt-12">
-            <div className="h-12 bg-white/20 rounded w-40 mx-auto animate-pulse"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white font-montserrat mb-4">
-            Our Security Services
-          </h2>
-          <p className="text-gray-200 text-sm sm:text-base max-w-2xl mx-auto mb-6">
-            {error}
-          </p>
-          <button
-            onClick={fetchServices}
-            className="rounded-md px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#1f8fce] hover:bg-gray-100 transition-all duration-300 inline-flex items-center text-sm sm:text-base font-semibold"
-          >
-            Try Again
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (services.length === 0) {
-    return (
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white font-montserrat mb-4">
-            Our Security Services
-          </h2>
-          <p className="text-gray-200 text-sm sm:text-base max-w-2xl mx-auto mb-6">
-            No services available at the moment. Please check back later.
-          </p>
-          <Link
-            href="/contact"
-            className="rounded-md px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#1f8fce] hover:bg-gray-100 transition-all duration-300 inline-flex items-center text-sm sm:text-base font-semibold"
-          >
-            Contact Us
-          </Link>
-        </div>
-      </section>
-    );
-  }
+  const duplicatedServices = [...services, ...services, ...services];
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
@@ -370,11 +296,11 @@ export default function ServicesSection() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center mt-8 sm:mt-12"
         >
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-row gap-2 sm:gap-4 justify-center items-center">
             {/* View All Services Button - Primary */}
             <Link
               href="/services"
-              className="rounded-md px-6 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-white border-white text-[#1f8fce] hover:bg-[#1f8fce] hover:border-white hover:text-white transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base w-full sm:w-auto min-w-[140px]"
+              className="rounded-md px-4 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-white border-white text-[#1f8fce] hover:bg-[#1f8fce] hover:border-white hover:text-white transition-all duration-300 inline-flex items-center justify-center text-xs sm:text-base flex-1 sm:flex-none sm:w-auto min-w-0 sm:min-w-[140px]"
             >
               <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-[#1f8fce] top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
               <span className="relative transition duration-300 ease font-semibold">
@@ -385,7 +311,7 @@ export default function ServicesSection() {
             {/* Contact Button - Secondary/Outline */}
             <Link
               href="/contact"
-              className="rounded-md px-6 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium border-white text-white bg-transparent hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base w-full sm:w-auto min-w-[140px]"
+              className="rounded-md px-4 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium border-white text-white bg-transparent hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-xs sm:text-base flex-1 sm:flex-none sm:w-auto min-w-0 sm:min-w-[140px]"
             >
               <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
               <span className="relative transition duration-300 ease font-semibold">
@@ -415,7 +341,7 @@ const ServiceCard = ({ service, cardsPerView, generateSlug }) => {
     >
       <div className="flex flex-col h-full">
         {/* Service Image */}
-        <div className="relative w-full h-32 mb-3 sm:mb-4 rounded-lg overflow-hidden">
+        <div className="relative w-full h-48 mb-3 sm:mb-4 rounded-lg overflow-hidden">
           {service.image_url ? (
             <Image
               src={service.image_url}

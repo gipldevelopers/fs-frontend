@@ -130,12 +130,12 @@ export default function CtaSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start"
+              className="flex flex-row gap-2 sm:gap-4 justify-center sm:justify-start"
             >
               {/* Primary Button - Get Started */}
               <Link
                 href="/get-started"
-                className="rounded-md px-6 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-white border-white text-[#1f8fce] hover:bg-[#1f8fce] hover:border-white hover:text-white transition-all duration-300 inline-flex items-center justify-center text-base sm:text-lg font-semibold w-full sm:w-auto min-w-[160px]"
+                className="rounded-md px-4 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-white border-white text-[#1f8fce] hover:bg-[#1f8fce] hover:border-white hover:text-white transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-lg font-semibold flex-1 sm:flex-none sm:w-auto min-w-0 sm:min-w-[160px]"
               >
                 <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-[#1f8fce] top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
                 <span className="relative transition duration-300 ease font-semibold">
@@ -146,7 +146,7 @@ export default function CtaSection() {
               {/* Secondary Button - Contact Sales */}
               <Link
                 href="/contact"
-                className="rounded-md px-6 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium border-white text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-base sm:text-lg font-semibold w-full sm:w-auto min-w-[160px]"
+                className="rounded-md px-4 sm:px-8 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium border-white text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-lg font-semibold flex-1 sm:flex-none sm:w-auto min-w-0 sm:min-w-[160px]"
               >
                 <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
                 <span className="relative transition duration-300 ease font-semibold">

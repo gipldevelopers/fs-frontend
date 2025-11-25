@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Upload, 
   User,
@@ -216,11 +217,13 @@ export default function CreateTestimonialPage() {
               {/* Avatar Preview */}
               {avatarPreview && (
                 <div className="mb-4">
-                  <div className="relative inline-block">
-                    <img
+                  <div className="relative inline-block w-20 h-20 rounded-full overflow-hidden border border-gray-300">
+                    <Image
                       src={avatarPreview}
                       alt="Avatar preview"
-                      className="w-20 h-20 rounded-full object-cover border border-gray-300"
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
                     />
                     <button
                       type="button"

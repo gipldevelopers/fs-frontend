@@ -1,21 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
-  Shield,
-  Users,
-  Target,
-  Award,
-  Clock,
-  Globe,
-  Star,
   CheckCircle,
   ChevronRight,
 } from "lucide-react";
-import { apiService } from '@/app/lib/api';
+import { staticServices } from "@/app/lib/staticServices";
 
 // Animation variants
 const containerVariants = {
@@ -161,97 +154,7 @@ const ServiceCard = ({ service, index }) => {
 };
 
 export default function ServicesPage() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchServices();
-    setIsVisible(true);
-  }, []);
-
-  const fetchServices = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log('🔄 Fetching services from API...');
-      
-      const response = await apiService.getAdminServices();
-      console.log('📡 Services API Response:', response);
-      
-      if (response.success) {
-        console.log('✅ Services data received:', response.data);
-        setServices(response.data);
-      } else {
-        setError(response.error || 'Failed to load services');
-      }
-    } catch (error) {
-      console.error('💥 Error fetching services:', error);
-      setError('Failed to load services: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Loading Banner */}
-        <section className="relative pt-10 pb-8 sm:pt-20 sm:pb-16 lg:pt-32 lg:pb-24 h-auto min-h-[45vh] sm:min-h-[70vh] lg:min-h-[500px] bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce] overflow-hidden">
-          <div className="relative z-10 h-full flex items-center justify-center text-center">
-            <div className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full pt-12 pb-0 sm:py-0">
-              <div className="animate-pulse">
-                <div className="h-8 bg-white/20 rounded w-48 mx-auto mb-6"></div>
-                <div className="h-16 bg-white/20 rounded w-96 mx-auto mb-4"></div>
-                <div className="h-6 bg-white/20 rounded w-80 mx-auto mb-8"></div>
-                <div className="h-12 bg-white/20 rounded w-64 mx-auto"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Loading Services Grid */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <div key={item} className="bg-white border border-blue-200 rounded-xl p-6 sm:p-8 shadow-lg animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-4/5"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Services</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={fetchServices}
-            className="bg-[#1f8fce] text-white px-6 py-3 rounded-lg hover:bg-[#167aac] transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [services] = useState(staticServices);
 
   return (
     <div className="min-h-screen bg-white">
@@ -369,52 +272,52 @@ export default function ServicesPage() {
       </section>
 
       {/* CTA Section - Services Focused - REVISED CONTENT */}
-<section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
-  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.8 }}
-    >
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-montserrat mb-4">
-        <AnimatedTitle
-          title="Ready for Vigilance You Can Trust?"
-          highlight="Vigilance"
-        />
-      </h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="text-white/90 font-poppins text-lg sm:text-xl mb-8 max-w-2xl mx-auto"
-      >
-        Talk to our specialists about manned guarding, surveillance, or investigation services tailored for your property in Gujarat.
-      </motion.p>
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-montserrat mb-4">
+              <AnimatedTitle
+                title="Ready for Vigilance You Can Trust?"
+                highlight="Vigilance"
+              />
+            </h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-white/90 font-poppins text-lg sm:text-xl mb-8 max-w-2xl mx-auto"
+            >
+              Talk to our specialists about manned guarding, surveillance, or investigation services tailored for your property in Gujarat.
+            </motion.p>
 
-      {/* Buttons inline on mobile and desktop - MODIFIED to one button */}
-      <motion.div
-        className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 w-full max-w-2xl mx-auto"
-      >
-        {/* Primary Button: Get Security Assessment - Longer (Now the only button) */}
-        <Link
-          href="/contact"
-          // Class modified to ensure it centers nicely when alone
-          className="w-full sm:w-auto rounded-md px-8 sm:px-12 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-[#1f8fce] border-[#1f8fce] text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[200px]"
-        >
-          <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-          <span className="relative transition duration-300 ease font-semibold">
-            Get Free Security Quote
-          </span>
-        </Link>
+            {/* Buttons inline on mobile and desktop - MODIFIED to one button */}
+            <motion.div
+              className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 w-full max-w-2xl mx-auto"
+            >
+              {/* Primary Button: Get Security Assessment - Longer (Now the only button) */}
+              <Link
+                href="/contact"
+                // Class modified to ensure it centers nicely when alone
+                className="w-full sm:w-auto rounded-md px-8 sm:px-12 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-[#1f8fce] border-[#1f8fce] text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[200px]"
+              >
+                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
+                <span className="relative transition duration-300 ease font-semibold">
+                  Get Free Security Quote
+                </span>
+              </Link>
 
-        {/* Removed Secondary Button: Contact Sales Team */}
-        
-      </motion.div>
-    </motion.div>
-  </div>
-</section>
+              {/* Removed Secondary Button: Contact Sales Team */}
+
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

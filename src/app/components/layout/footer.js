@@ -93,14 +93,14 @@ export default function Footer() {
                   Gallery
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link 
                   href="/blogs" 
                   className="text-gray-600 font-poppins hover:text-[#1f8fce] transition-all duration-300 hover:translate-x-1 inline-block text-sm sm:text-base"
                 >
                   Blogs
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link 
                   href="/contact" 
@@ -193,8 +193,7 @@ export default function Footer() {
             </div>
 
             {/* Right Side - Powered By with Logo */}
-            <div className="flex items-center space-x-2 text-gray-600 font-poppins text-xs sm:text-sm">
-              
+            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-600 font-poppins text-xs sm:text-sm">
               <span>Powered by:</span>
               {/* GIPL Logo Link */}
               <a 
@@ -202,22 +201,16 @@ export default function Footer() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 aria-label="Gohil Infotech Logo"
+                className="flex items-center hover:opacity-80 transition-opacity duration-300"
               >
                 <Image
-                  src="/images/GIPL_Logo mark.png"
+                  src="/images/gipl-logo.png"
                   alt="Gohil Infotech Logo"
-                  width={50} // Set small size
-                  height={50} // Set small size
-                  className="w-8 h-8 object-contain"
+                  width={80}
+                  height={30}
+                  className="h-5 sm:h-6 w-auto object-contain"
+                  priority={false}
                 />
-              </a>
-              <a 
-                href="https://gohilinfotech.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#1f8fce] hover:text-blue-600 transition-colors duration-300 font-semibold"
-              >
-                Gohil Infotech
               </a>
             </div>
           </div>

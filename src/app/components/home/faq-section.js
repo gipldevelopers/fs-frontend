@@ -179,49 +179,25 @@ export default function FAQSection() {
       id: 'item-1',
       icon: 'shield',
       question: 'Are your security guards licensed and trained?',
-      answer: 'Yes, all our guards are fully licensed by the relevant authorities in Gujarat and undergo rigorous training protocols. This includes emergency response, conflict resolution, first aid, and the use of modern surveillance technology to ensure professional service.',
+      answer: 'Yes, all our guards are fully licensed and trained to handle various security situations professionally.',
     },
     {
       id: 'item-2',
-      icon: 'home',
-      question: 'Do you offer residential security solutions?',
-      answer: 'Absolutely. We provide comprehensive residential security tailored to protect your family and property, including 24/7 manned guards, regular patrols, alarm systems, and CCTV monitoring. Solutions are personalized for apartments and large properties.',
+      icon: 'building',
+      question: 'What types of security services do you offer?',
+      answer: 'We provide commercial security, residential security, private security guards, bodyguard services, event security, and customized protection plans tailored to your needs.',
     },
     {
       id: 'item-3',
-      icon: 'building',
-      question: 'What business security services do you offer?',
-      answer: 'We cover the full spectrum of business security, from Commercial and Industrial Guarding to Corporate Security. Services include access control, fire watch, retail loss prevention, and on-site security teams for corporate campuses and factories.',
+      icon: 'globe',
+      question: 'Do you provide security services across Gujarat?',
+      answer: 'Yes, we serve clients throughout Gujarat, including Gandhinagar, Ahmedabad, Surat, Vadodara, Rajkot, and more.',
     },
     {
       id: 'item-4',
-      icon: 'globe',
-      question: 'Do you provide security services across Gujarat?',
-      answer: 'Yes, we are a licensed agency serving clients throughout Gujarat, including major cities like Gandhinagar, Ahmedabad, Surat, Vadodara, and Rajkot. We deploy personnel regionally based on client needs.',
-    },
-    {
-      id: 'item-5',
-      icon: 'users',
-      question: 'Do you provide security personnel for events?',
-      answer: 'Yes, we offer specialized Event & Private Security. Our trained professionals manage access control, crowd management, VIP protection, and ensure a safe environment for all types of events, from corporate functions to private celebrations.',
-    },
-    {
-      id: 'item-6',
       icon: 'clock',
       question: 'Is your security service available 24/7?',
-      answer: 'Yes, we offer round-the-clock security services to ensure you are protected at all times. This includes continuous manned guarding and 24/7 remote surveillance support for immediate incident response.',
-    },
-    {
-      id: 'item-7',
-      icon: 'lock',
-      question: 'How do you handle emergency situations?',
-      answer: 'We have established emergency protocols and maintain direct communication channels with local police and medical services. Our on-site guards and central monitoring teams are trained to follow strict incident response procedures to neutralize threats quickly.',
-    },
-    {
-      id: 'item-8',
-      icon: 'credit-card',
-      question: 'What payment options do you accept?',
-      answer: 'We accept bank transfers (NEFT/RTGS), UPI, and all major credit/debit cards. We offer flexible contract terms (monthly, quarterly, or annual) tailored to the long-term needs of businesses and individuals.',
+      answer: 'Yes, we offer round-the-clock security services to ensure you are protected at all times.',
     }
   ];
 

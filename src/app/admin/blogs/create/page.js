@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft,
@@ -288,11 +289,13 @@ export default function CreateBlogPage() {
                 
                 {/* Image Preview */}
                 {imagePreview && (
-                  <div className="mb-4 relative">
-                    <img
+                  <div className="mb-4 relative w-full h-48 rounded-lg overflow-hidden">
+                    <Image
                       src={imagePreview}
                       alt="Featured preview"
-                      className="w-full h-48 object-cover rounded-lg"
+                      width={800}
+                      height={192}
+                      className="w-full h-full object-cover rounded-lg"
                     />
                     <button
                       type="button"

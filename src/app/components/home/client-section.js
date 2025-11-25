@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { apiService } from "@/app/lib/api";
 
@@ -142,19 +143,14 @@ const ClientLogo = React.memo(({ client }) => {
           <div className="w-8 h-8 border-2 border-[#1f8fce] border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-      <img
-        ref={imgRef}
+      <Image
         src={client.logo}
         alt={`${client.name} logo`}
+        width={80}
+        height={80}
         className={`w-full h-full object-contain transition-opacity duration-300 ${
           imageLoading ? 'opacity-0' : 'opacity-100'
         }`}
-        style={{ 
-          // Force browser to cache the image
-          imageRendering: 'auto',
-          backfaceVisibility: 'hidden',
-          transform: 'translateZ(0)'
-        }}
         onLoad={() => setImageLoading(false)}
         onError={() => {
           setImageError(true);
@@ -303,6 +299,7 @@ export default function OurClientsSection() {
   // Fetch clients from API or use real data
   useEffect(() => {
     fetchClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchClients = async () => {
@@ -495,7 +492,7 @@ export default function OurClientsSection() {
             Our Valued Clients
           </h2>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            We're proud to partner with amazing organizations. Our client portfolio will be updated soon.
+            We&apos;re proud to partner with amazing organizations. Our client portfolio will be updated soon.
           </p>
         </div>
       </section>
@@ -519,7 +516,7 @@ export default function OurClientsSection() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0"
               >
-                We're honored to work with some of the most innovative and respected companies across various industries. 
+                We&apos;re honored to work with some of the most innovative and respected companies across various industries. 
                 Their trust in our security services drives us to deliver excellence every day.
               </motion.p>
             </div>

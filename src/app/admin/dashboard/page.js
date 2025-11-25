@@ -31,6 +31,7 @@ export default function Dashboard() {
     }, 30000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDashboardData = async () => {

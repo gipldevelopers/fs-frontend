@@ -7,13 +7,10 @@ import { motion } from "framer-motion";
 import {
   ChevronRight,
   CheckCircle,
-  Clock,
-  Users,
-  Shield,
   Star,
   ArrowLeft,
 } from "lucide-react";
-import { apiService } from "@/app/lib/api";
+import { staticServices } from "@/app/lib/staticServices";
 
 // Animation variants
 const containerVariants = {
@@ -97,7 +94,6 @@ const AnimatedTitle = ({ title, highlight }) => {
 export default function ServiceDetailPage({ params }) {
   const [slug, setSlug] = useState(null);
   const [service, setService] = useState(null);
-  const [allServices, setAllServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -116,41 +112,28 @@ export default function ServiceDetailPage({ params }) {
 
   useEffect(() => {
     if (slug) {
-      fetchServiceData();
-    }
-  }, [slug]);
+      // Find the service that matches the slug from static data
+      const foundService = staticServices.find((s) => {
+        // Normalize title to slug format
+        const normalizedTitle = s.title
+          .toLowerCase()
+          .replace(/&/g, "and")
+          .replace(/\s+/g, "-");
+        // Also check with "and" replaced with "-"
+        const altSlug = normalizedTitle.replace(/and/g, "-");
+        return normalizedTitle === slug || altSlug === slug;
+      });
 
-  const fetchServiceData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Fetch all services first
-      const servicesResponse = await apiService.getAdminServices();
-
-      if (servicesResponse.success) {
-        setAllServices(servicesResponse.data);
-
-        // Find the service that matches the slug
-        const foundService = servicesResponse.data.find(
-          (s) => s.title.toLowerCase().replace(/\s+/g, "-") === slug
-        );
-
-        if (foundService) {
-          setService(foundService);
-        } else {
-          setError("Service not found");
-        }
+      if (foundService) {
+        setService(foundService);
+        setError(null);
       } else {
-        setError("Failed to load services");
+        setError("Service not found");
+        setService(null);
       }
-    } catch (error) {
-      console.error("💥 Error fetching service data:", error);
-      setError("Failed to load service: " + error.message);
-    } finally {
       setIsLoading(false);
     }
-  };
+  }, [slug]);
 
   
 
@@ -313,7 +296,7 @@ export default function ServiceDetailPage({ params }) {
   return (
     <div className="min-h-screen bg-white">
       {/* Creative Inner Banner - Same as Services Page */}
-      <section className="relative pt-10 pb-8 sm:pt-20 sm:pb-16 lg:pt-32 lg:pb-24 h-auto min-h-[45vh] sm:min-h-[70vh] lg:min-h-[500px] bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce] overflow-hidden">
+      <section className="relative pt-8 pb-6 sm:pt-16 sm:pb-12 lg:pt-24 lg:pb-16 h-auto min-h-[40vh] sm:min-h-[50vh] lg:min-h-[450px] bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce] overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-4 left-4 w-12 h-12 sm:top-6 sm:left-6 sm:w-16 sm:h-16 lg:top-10 lg:left-10 lg:w-20 lg:h-20 bg-white/10 rounded-full blur-lg sm:blur-xl"></div>
@@ -335,7 +318,7 @@ export default function ServiceDetailPage({ params }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="flex justify-center items-center space-x-2 text-white/80 text-xs sm:text-sm md:text-base mb-3 sm:mb-6 font-poppins"
+              className="flex justify-center items-center space-x-2 text-white/80 text-xs sm:text-sm md:text-base mb-2 sm:mb-4 font-poppins"
             >
               <Link
                 href="/"
@@ -359,7 +342,7 @@ export default function ServiceDetailPage({ params }) {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8 }}
-              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-montserrat mb-3 sm:mb-6"
+              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white font-montserrat mb-2 sm:mb-4"
             >
               <motion.span
                 initial="hidden"
@@ -383,7 +366,7 @@ export default function ServiceDetailPage({ params }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
-              className="text-sm sm:text-lg md:text-xl text-white/90 font-poppins max-w-2xl mx-auto leading-relaxed mb-4 sm:mb-6 px-2 sm:px-0"
+              className="text-sm sm:text-base md:text-lg text-white/90 font-poppins max-w-2xl mx-auto leading-relaxed mb-3 sm:mb-4 px-2 sm:px-0"
             >
               {service.description}
             </motion.p>
@@ -418,32 +401,44 @@ export default function ServiceDetailPage({ params }) {
       </section>
 
       {/* Service Overview Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-8 sm:py-10 lg:py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
             {/* Content */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.8 }}
-              className="space-y-6"
+              className="space-y-5"
             >
               <div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-montserrat mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 font-montserrat mb-3">
                   About Our {service.title} Service
                 </h2>
-                <p className="text-gray-600 font-poppins text-base sm:text-lg leading-relaxed">
-                  {service.description}
-                </p>
+                <div className="text-gray-600 font-poppins text-sm sm:text-base leading-relaxed">
+                  {service.detailedContent ? (
+                    <div className="space-y-3">
+                      {service.detailedContent.split('\n\n').map((paragraph, index) => (
+                        paragraph.trim() && (
+                          <p key={index} className="mb-3">
+                            {paragraph.trim()}
+                          </p>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    <p>{service.description}</p>
+                  )}
+                </div>
               </div>
 
               {/* Key Features */}
-              <div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 font-montserrat mb-4">
+              <div className="mt-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 font-montserrat mb-3">
                   Key Features
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {serviceFeatures.map((feature, index) => (
                     <motion.div
                       key={index}
@@ -451,10 +446,10 @@ export default function ServiceDetailPage({ params }) {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, margin: "-50px" }}
                       transition={{ delay: index * 0.1, duration: 0.6 }}
-                      className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg"
+                      className="flex items-start gap-2.5 p-2.5 bg-blue-50 rounded-lg"
                     >
-                      <CheckCircle className="w-5 h-5 text-[#1f8fce] flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700 font-poppins text-sm sm:text-base">
+                      <CheckCircle className="w-4 h-4 text-[#1f8fce] flex-shrink-0 mt-1" />
+                      <span className="text-gray-700 font-poppins text-sm leading-relaxed">
                         {feature}
                       </span>
                     </motion.div>
@@ -469,16 +464,27 @@ export default function ServiceDetailPage({ params }) {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.8 }}
-              className="space-y-6"
+              className="space-y-5 lg:sticky lg:top-20 lg:self-start"
             >
-              
+              {/* Service Image */}
+              {service.image_url && (
+                <div className="relative w-full h-64 rounded-xl overflow-hidden mb-4">
+                  <Image
+                    src={service.image_url}
+                    alt={service.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </div>
+              )}
 
               {/* Benefits Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                <h3 className="text-xl font-bold text-gray-900 font-montserrat mb-4">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                <h3 className="text-lg font-bold text-gray-900 font-montserrat mb-3">
                   Key Benefits
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {serviceBenefits.map((benefit, index) => (
                     <motion.div
                       key={index}
@@ -486,10 +492,10 @@ export default function ServiceDetailPage({ params }) {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-50px" }}
                       transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                      className="flex items-center gap-3"
+                      className="flex items-start gap-2.5"
                     >
-                      <Star className="w-5 h-5 text-[#1f8fce] flex-shrink-0" />
-                      <span className="text-gray-700 font-poppins text-sm sm:text-base">
+                      <Star className="w-4 h-4 text-[#1f8fce] flex-shrink-0 mt-1" />
+                      <span className="text-gray-700 font-poppins text-sm leading-relaxed">
                         {benefit}
                       </span>
                     </motion.div>
@@ -501,118 +507,115 @@ export default function ServiceDetailPage({ params }) {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* FAQ Section */}
+      {service.faqs && service.faqs.length > 0 && (
+        <section className="py-8 sm:py-10 lg:py-12 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-6"
+            >
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 font-montserrat mb-2">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-gray-600 font-poppins text-base">
+                Common questions about our {service.title} service
+              </p>
+            </motion.div>
+
+            <div className="space-y-3">
+              {service.faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  className="bg-white rounded-xl p-4 sm:p-5 border border-blue-200 shadow-sm"
+                >
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 font-montserrat mb-2">
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-700 font-poppins text-sm sm:text-base leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
+      <section className="py-8 sm:py-10 lg:py-12 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            transition={{ duration: 0.8 }}
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-montserrat mb-4">
-              Our Implementation Process
+            <h2 className="text-2xl sm:text-3xl font-bold text-white font-montserrat mb-3">
+              Ready to Secure Your {service.title}?
             </h2>
-            <p className="text-gray-600 font-poppins text-lg max-w-2xl mx-auto">
-              A structured approach to ensure your security needs are met
-              effectively
-            </p>
-          </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-white/90 font-poppins text-base sm:text-lg mb-6 max-w-2xl mx-auto"
+            >
+              Don&apos;t compromise on protection. Get a personalized quote and consultation for your specific {service.title.toLowerCase()} requirements in Gujarat.
+            </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
-            {serviceProcess.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="text-center"
+            <motion.div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 w-full max-w-2xl mx-auto">
+              <Link
+                href="/contact"
+                className="w-full sm:w-auto rounded-md px-6 sm:px-10 py-2.5 sm:py-3 overflow-hidden relative group cursor-pointer border-2 font-medium bg-[#1f8fce] border-[#1f8fce] text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[180px]"
               >
-                <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg border border-blue-200 h-full flex flex-col items-center">
-                  <div className="w-12 h-12 bg-[#1f8fce] rounded-full flex items-center justify-center mb-4 flex-shrink-0">
-                    <span className="text-white text-lg font-bold font-montserrat">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 font-montserrat mb-2 text-sm sm:text-base">
-                    {step}
-                  </h3>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
+                <span className="relative transition duration-300 ease font-semibold">
+                  Get Free Quote
+                </span>
+              </Link>
+
+              <Link
+                href="/services"
+                className="w-full sm:w-auto rounded-md px-6 sm:px-10 py-2.5 sm:py-3 overflow-hidden relative group cursor-pointer border-2 font-medium bg-transparent border-white text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[180px]"
+              >
+                <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
+                <span className="relative transition duration-300 ease font-semibold">
+                  Explore All Services
+                </span>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#1a1a5e] via-[#27276f] to-[#1f8fce]">
-  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.8 }}
-    >
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white font-montserrat mb-4">
-        Ready to Secure Your {service.title}?
-      </h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="text-white/90 font-poppins text-lg sm:text-xl mb-8 max-w-2xl mx-auto"
-      >
-        Don&apos;t compromise on protection. Get a personalized quote and consultation for your specific {service.title.toLowerCase()} requirements in Gujarat.
-      </motion.p>
-
-      <motion.div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 w-full max-w-2xl mx-auto">
-        <Link
-          href="/contact"
-          className="w-full sm:w-auto rounded-md px-8 sm:px-12 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-[#1f8fce] border-[#1f8fce] text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[200px]"
-        >
-          <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-          <span className="relative transition duration-300 ease font-semibold">
-            Get Free Quote
-          </span>
-        </Link>
-
-        <Link
-          href="/services"
-          className="w-full sm:w-auto rounded-md px-8 sm:px-12 py-3 sm:py-4 overflow-hidden relative group cursor-pointer border-2 font-medium bg-transparent border-white text-white hover:bg-white hover:text-[#1f8fce] transition-all duration-300 inline-flex items-center justify-center text-sm sm:text-base whitespace-nowrap min-w-[200px]"
-        >
-          <span className="absolute w-64 h-0 transition-all duration-300 origin-center rotate-45 -translate-x-20 bg-white top-1/2 group-hover:h-64 group-hover:-translate-y-32 ease"></span>
-          <span className="relative transition duration-300 ease font-semibold">
-            Explore All Services
-          </span>
-        </Link>
-      </motion.div>
-    </motion.div>
-  </div>
-</section>
-
       {/* Related Services */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="py-8 sm:py-10 lg:py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-6"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 font-montserrat mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 font-montserrat mb-2">
               Explore More Services
             </h2>
-            <p className="text-gray-600 font-poppins">
+            <p className="text-gray-600 font-poppins text-sm sm:text-base">
               Discover our other comprehensive security solutions
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {allServices
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {staticServices
               .filter((s) => s.title !== service.title)
               .slice(0, 3)
               .map((relatedService, index) => (
@@ -622,15 +625,15 @@ export default function ServiceDetailPage({ params }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 hover:shadow-xl transition-all duration-300"
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-5 border border-blue-200 hover:shadow-xl transition-all duration-300"
                 >
-                  <div className="text-4xl mb-4">
+                  <div className="text-3xl mb-3">
                     {relatedService.icon || "🛡️"}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 font-montserrat mb-3">
+                  <h3 className="text-lg font-bold text-gray-900 font-montserrat mb-2">
                     {relatedService.title}
                   </h3>
-                  <p className="text-gray-600 font-poppins text-sm mb-4 leading-relaxed">
+                  <p className="text-gray-600 font-poppins text-sm mb-3 leading-relaxed">
                     {relatedService.description}
                   </p>
                   <Link

@@ -14,7 +14,6 @@ import {
   Minimize2,
   Image as ImageIcon
 } from "lucide-react";
-import { apiService } from '@/app/lib/api';
 
 // Animation variants
 const containerVariants = {
@@ -66,6 +65,94 @@ const splitText = (text) => {
   ));
 };
 
+// Static Gallery Images Data - Security Guard Services
+const staticGalleryImages = [
+  {
+    id: 1,
+    image_url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=1200&fit=crop&q=80',
+    title: 'Security Guard on Duty',
+    description: 'Professional security personnel ensuring safety and protection',
+    image_name: 'security-guard-duty'
+  },
+  {
+    id: 2,
+    image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1200&fit=crop&q=80',
+    title: 'Corporate Security Team',
+    description: 'Business security services for corporate facilities',
+    image_name: 'corporate-security-team'
+  },
+  {
+    id: 3,
+    image_url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&h=1200&fit=crop&q=80',
+    title: 'Residential Security Guard',
+    description: 'Home security protection and residential safety',
+    image_name: 'residential-security-guard'
+  },
+  {
+    id: 4,
+    image_url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=1200&fit=crop&q=80',
+    title: 'Event Security Personnel',
+    description: 'Event and private security services for gatherings',
+    image_name: 'event-security-personnel'
+  },
+  {
+    id: 5,
+    image_url: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=1200&fit=crop&q=80',
+    title: 'Retail Security Guard',
+    description: 'Retail store security and loss prevention',
+    image_name: 'retail-security-guard'
+  },
+  {
+    id: 6,
+    image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=1200&fit=crop&q=80',
+    title: 'Industrial Security Guard',
+    description: 'Industrial facility protection and monitoring',
+    image_name: 'industrial-security-guard'
+  },
+  {
+    id: 7,
+    image_url: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=1200&fit=crop&q=80',
+    title: 'Security Team Patrol',
+    description: 'Our professional security team on patrol duty',
+    image_name: 'security-team-patrol'
+  },
+  {
+    id: 8,
+    image_url: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&h=1200&fit=crop&q=80',
+    title: 'Security Guard Station',
+    description: 'Security guard at monitoring station',
+    image_name: 'security-guard-station'
+  },
+  {
+    id: 9,
+    image_url: 'https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=800&h=1200&fit=crop&q=80',
+    title: 'Access Control Security',
+    description: 'Security guard managing access control',
+    image_name: 'access-control-security'
+  },
+  {
+    id: 10,
+    image_url: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&h=1200&fit=crop&q=80',
+    title: 'Security Guard Patrol',
+    description: 'Regular security patrols and monitoring',
+    image_name: 'security-patrol'
+  },
+  {
+    id: 11,
+    image_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1200&fit=crop&q=80',
+    title: 'VIP Protection Service',
+    description: 'Executive protection and VIP security services',
+    image_name: 'vip-protection-service'
+  },
+  {
+    id: 12,
+    image_url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=1200&fit=crop&q=80',
+    title: 'Security Guard Training',
+    description: 'Professional security training and certification',
+    image_name: 'security-training'
+  }
+];
+
 // Animated Title Component
 const AnimatedTitle = ({ title, highlight }) => {
   const parts = title.split(highlight);
@@ -95,47 +182,12 @@ const AnimatedTitle = ({ title, highlight }) => {
   );
 };
 
-// Helper function to get image URL from any possible field
+// Helper function to get image URL from static data
 const getImageUrl = (image) => {
   if (!image) return null;
   
-  // Check all possible field names in order of priority
-  const possibleFields = [
-    'image_url',    // Your actual field name
-    'url',          // Common field name
-    'image_path',   // Another common field
-    'filename',     // Another common field
-    'path',         // Another common field
-    'src'           // Another common field
-  ];
-  
-  for (const field of possibleFields) {
-    if (image[field] && image[field].trim() !== '') {
-      const imagePath = image[field];
-      
-      // If it's already a full URL, return as is
-      if (imagePath.startsWith('http')) {
-        return imagePath;
-      }
-      
-      // If it's a local path, construct the full URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-      return `${baseUrl}/${cleanPath}`;
-    }
-  }
-  
-  return null;
-};
-
-// Debug function to check image object structure
-const debugImageObject = (img, index) => {
-  console.log(`🔍 Image ${index}:`, img);
-  console.log(`   - image_url:`, img.image_url);
-  console.log(`   - URL:`, img.url);
-  console.log(`   - Image Path:`, img.image_path);
-  console.log(`   - Filename:`, img.filename);
-  console.log(`   - Full URL:`, getImageUrl(img));
+  // For static data, use image_url or fullUrl
+  return image.fullUrl || image.image_url || null;
 };
 
 // Image Modal Component
@@ -322,75 +374,17 @@ const GalleryImageCard = ({ image, index, onClick }) => {
 };
 
 export default function GalleryPage() {
-  const [galleryImages, setGalleryImages] = useState([]);
+  // Process static images with index and total
+  const galleryImages = staticGalleryImages.map((img, index, array) => ({
+    ...img,
+    index,
+    total: array.length,
+    fullUrl: img.image_url
+  }));
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchGalleryImages();
-  }, []);
-
-  const fetchGalleryImages = async () => {
-    try {
-      console.log('🔄 Fetching gallery images...');
-      setIsLoading(true);
-      const result = await apiService.getGallery();
-      
-      console.log('📸 Gallery API response:', result);
-      
-      if (result && (result.success || Array.isArray(result))) {
-        // Handle different response structures
-        let images = [];
-        
-        if (Array.isArray(result.data)) {
-          images = result.data;
-        } else if (Array.isArray(result.images)) {
-          images = result.images;
-        } else if (Array.isArray(result)) {
-          images = result;
-        } else if (result.data && Array.isArray(result.data.images)) {
-          images = result.data.images;
-        }
-        
-        console.log('🖼️ Raw images from API:', images);
-        
-        if (images && images.length > 0) {
-          // Debug: Check each image object structure
-          console.log('🔍 Debugging image objects:');
-          images.forEach((img, index) => debugImageObject(img, index));
-          
-          // Process ALL images with the correct field name
-          const processedImages = images.map((img, index, array) => {
-            const imageUrl = getImageUrl(img);
-            return {
-              ...img,
-              index,
-              total: array.length,
-              fullUrl: imageUrl
-            };
-          });
-          
-          console.log('✅ All processed images with URLs:', processedImages);
-          
-          // Only set to state if we have images
-          setGalleryImages(processedImages);
-        } else {
-          console.warn('⚠️ No images found in the response data');
-          setGalleryImages([]);
-        }
-      } else {
-        console.warn('⚠️ Invalid API response structure:', result);
-        setGalleryImages([]);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching gallery images:', error);
-      setGalleryImages([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const openModal = (index) => {
     const image = galleryImages[index];
@@ -530,37 +524,16 @@ export default function GalleryPage() {
       {/* Gallery Grid Section */}
       <section className="py-8 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          {isLoading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1f8fce] mx-auto"></div>
-              <p className="mt-4 text-gray-600 font-poppins">Loading gallery images...</p>
-            </div>
-          ) : galleryImages.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                {galleryImages.map((image, index) => (
-                  <GalleryImageCard
-                    key={image.id || image._id || index}
-                    image={image}
-                    index={index}
-                    onClick={openModal}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <div className="text-gray-400 text-6xl mb-4">📷</div>
-              <p className="text-gray-500 text-lg font-poppins">No gallery images available at the moment.</p>
-              <p className="text-gray-400 mt-2 font-poppins">Check back later for new photos.</p>
-              <button
-                onClick={fetchGalleryImages}
-                className="mt-4 px-6 py-2 bg-[#1f8fce] text-white rounded-lg hover:bg-[#167aac] transition-colors duration-300"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {galleryImages.map((image, index) => (
+              <GalleryImageCard
+                key={image.id || index}
+                image={image}
+                index={index}
+                onClick={openModal}
+              />
+            ))}
+          </div>
         </div>
       </section>
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   ArrowLeft,
   Save,
@@ -58,6 +59,7 @@ export default function EditBlogPage() {
     if (params.id) {
       fetchBlog();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchBlog = async () => {
@@ -427,11 +429,13 @@ export default function EditBlogPage() {
                 
                 {/* Image Preview */}
                 {imagePreview && (
-                  <div className="mb-4 relative">
-                    <img
+                  <div className="mb-4 relative w-full h-48 rounded-lg overflow-hidden">
+                    <Image
                       src={imagePreview}
                       alt="Featured preview"
-                      className="w-full h-48 object-cover rounded-lg"
+                      width={800}
+                      height={192}
+                      className="w-full h-full object-cover rounded-lg"
                     />
                     <button
                       type="button"

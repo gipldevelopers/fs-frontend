@@ -205,9 +205,11 @@ const ClientLogo = ({ client, size = "medium" }) => {
           <div className="w-6 h-6 border-2 border-[#1f8fce] border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-      <img
+      <Image
         src={client.logo}
         alt={`${client.name} logo`}
+        width={120}
+        height={120}
         className={`w-full h-full object-contain transition-opacity duration-300 ${
           imageLoading ? 'opacity-0' : 'opacity-100'
         }`}
@@ -412,6 +414,7 @@ const TestimonialsCarousel = () => {
   useEffect(() => {
     const interval = setInterval(nextTestimonial, 5000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -450,7 +453,7 @@ const TestimonialsCarousel = () => {
                 ))}
               </div>
               <p className="text-gray-700 text-lg italic mb-6 font-poppins leading-relaxed">
-                "{testimonials[currentIndex].content}"
+                &ldquo;{testimonials[currentIndex].content}&rdquo;
               </p>
               <div>
                 <h4 className="font-bold text-gray-900 text-xl font-montserrat">

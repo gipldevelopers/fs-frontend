@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Upload, 
@@ -230,10 +231,12 @@ export default function CreateGalleryPage() {
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="relative group"
                       >
-                        <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                          <img
+                        <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200 relative">
+                          <Image
                             src={preview.url}
                             alt={`Preview ${index + 1}`}
+                            width={200}
+                            height={200}
                             className="w-full h-full object-cover"
                           />
                         </div>

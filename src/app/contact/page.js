@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Shield, Lock, Eye } from 'lucide-react';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { verifyRecaptcha } from '@/app/lib/recaptcha';
 
 // Animation variants
 const containerVariants = {
@@ -385,23 +384,16 @@ const ContactForm = () => {
 
       console.log('✅ reCAPTCHA token received');
 
-      // Verify token with backend
-      console.log('🔄 Verifying reCAPTCHA token...');
-      const recaptchaResult = await verifyRecaptcha(token);
-      
-      if (!recaptchaResult.success) {
-        throw new Error(recaptchaResult.error || 'reCAPTCHA verification failed');
-      }
-
-      console.log('✅ reCAPTCHA verification successful, score:', recaptchaResult.score);
-
-      // Proceed with form submission
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
+      // Proceed with form submission to Next.js API route
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken: token
+        }),
       });
 
       const result = await response.json();

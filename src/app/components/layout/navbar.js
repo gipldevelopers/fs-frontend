@@ -101,7 +101,7 @@ export default function Navbar() {
     { href: "/about", label: "About Us" },
     { href: "/services", label: "Services" },
     { href: "/client", label: "Our Client" },
-    { href: "/blogs", label: "Blogs" },
+    // { href: "/blogs", label: "Blogs" },
     // New Gallery Link
     { href: "/gallery", label: "Gallery" }, 
   ];
