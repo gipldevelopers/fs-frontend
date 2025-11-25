@@ -34,7 +34,22 @@ async function verifyRecaptchaToken(token) {
         'error-codes': data['error-codes'],
         challenge_ts: data.challenge_ts,
         hostname: data.hostname,
+        action: data.action,
       });
+      
+      // Log specific browser-error details
+      if (data['error-codes']?.includes('browser-error')) {
+        console.error('🔍 Browser Error Details:', {
+          message: 'This error typically occurs when:',
+          reasons: [
+            '1. The domain where the token was generated is not authorized in reCAPTCHA settings',
+            '2. The token was generated on a different domain than where it\'s being verified',
+            '3. The reCAPTCHA site key is not configured for the production domain',
+          ],
+          currentHostname: data.hostname,
+          suggestion: 'Add your production domain (fs-frontend-six.vercel.app) to reCAPTCHA allowed domains',
+        });
+      }
     }
     
     if (data.success) {
@@ -50,6 +65,8 @@ async function verifyRecaptchaToken(token) {
         errorMessage = 'Invalid reCAPTCHA token. Please try again.';
       } else if (errorCodes.includes('timeout-or-duplicate')) {
         errorMessage = 'reCAPTCHA token expired. Please refresh and try again.';
+      } else if (errorCodes.includes('browser-error')) {
+        errorMessage = 'reCAPTCHA browser error. This usually means the domain is not authorized. Please add your production domain to reCAPTCHA settings.';
       } else if (errorCodes.length > 0) {
         errorMessage = `reCAPTCHA error: ${errorCodes.join(', ')}`;
       }

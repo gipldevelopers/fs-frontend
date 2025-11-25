@@ -409,7 +409,14 @@ const ContactForm = () => {
           message: ''
         });
       } else {
-        alert(result.error || 'Failed to send message. Please try again.');
+        // Handle specific reCAPTCHA errors
+        if (result.error && result.error.includes('browser-error')) {
+          setRecaptchaError('reCAPTCHA domain configuration error. Please contact support or try again later.');
+          alert('reCAPTCHA verification failed. Please refresh the page and try again. If the problem persists, the domain may need to be added to reCAPTCHA settings.');
+        } else {
+          setRecaptchaError(result.error || 'Failed to send message. Please try again.');
+          alert(result.error || 'Failed to send message. Please try again.');
+        }
       }
     } catch (error) {
       console.error('❌ Error submitting form:', error);
