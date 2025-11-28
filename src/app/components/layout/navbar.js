@@ -39,7 +39,7 @@ export default function Navbar() {
 
   // WhatsApp redirect function
   const handleWhatsAppClick = () => {
-    const phoneNumber = '6351457958';
+    const phoneNumber = '9558554419';
     const message = 'Hello, I would like to get more information about your services.';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
