@@ -204,7 +204,7 @@ export async function POST(request) {
       const smtpUser = process.env.MAIL_USERNAME || process.env.SMTP_USER;
       const smtpPass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS;
       const smtpFrom = process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USERNAME || smtpUser;
-      const toEmail = process.env.TO_EMAIL || 'vraj@gohilinfotech.com';
+      const toEmail = process.env.TO_EMAIL || 'info@foreversecurity.in';
       const useSSL = process.env.MAIL_ENCRYPTION === 'ssl' || smtpPort === '465';
 
       if (!smtpHost || !smtpUser || !smtpPass) {
