@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { apiService } from "@/app/lib/api";
+// Removed API import - using hardcoded data only
 
 // Animation variants
 const containerVariants = {
@@ -106,8 +106,8 @@ const ClientLogo = React.memo(({ client }) => {
 
   // Preload image
   useEffect(() => {
-    if (client.logo && !imageError) {
-      const img = new Image();
+    if (client.logo && !imageError && typeof window !== 'undefined') {
+      const img = new window.Image();
       img.src = client.logo;
       img.onload = () => setImageLoading(false);
       img.onerror = () => {
@@ -288,60 +288,41 @@ export default function OurClientsSection() {
 
   // Image preloading function
   const preloadImages = (clients) => {
+    if (typeof window === 'undefined') return;
     clients.forEach(client => {
       if (client.logo) {
-        const img = new Image();
+        const img = new window.Image();
         img.src = client.logo;
       }
     });
   };
 
-  // Fetch clients from API or use real data
+  // Load hardcoded clients data
   useEffect(() => {
-    fetchClients();
+    const loadClients = () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Use hardcoded clients data
+        const clientsData = realClients;
+
+        // Preload all images before setting state
+        preloadImages(clientsData);
+        setClients(clientsData);
+        
+      } catch (error) {
+        console.error("Error loading clients:", error);
+        setError("Failed to load clients: " + error.message);
+        setClients(realClients);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClients();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchClients = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Try to fetch from API first
-      let clientsData = [];
-      
-      try {
-        const response = await apiService.getClients();
-        
-        if (response.success) {
-          if (Array.isArray(response.data)) {
-            clientsData = response.data;
-          } else if (response.data && Array.isArray(response.data.clients)) {
-            clientsData = response.data.clients;
-          } else if (response.data && Array.isArray(response.data.data)) {
-            clientsData = response.data.data;
-          }
-        }
-      } catch (apiError) {
-        console.log("API not available, using real client data");
-      }
-
-      if (clientsData.length === 0) {
-        clientsData = realClients;
-      }
-
-      // Preload all images before setting state
-      preloadImages(clientsData);
-      setClients(clientsData);
-      
-    } catch (error) {
-      setError("Failed to load clients: " + error.message);
-      preloadImages(realClients);
-      setClients(realClients);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Update cards per view based on screen size
   useEffect(() => {
@@ -473,7 +454,15 @@ export default function OurClientsSection() {
           </h2>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">{error}</p>
           <button
-            onClick={fetchClients}
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              setTimeout(() => {
+                preloadImages(realClients);
+                setClients(realClients);
+                setLoading(false);
+              }, 500);
+            }}
             className="bg-[#1f8fce] text-white px-6 py-3 rounded-lg hover:bg-[#167aac] transition-colors"
           >
             Try Again
