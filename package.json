@@ -1,7 +1,21 @@
 {
   "name": "forever-security",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "author": {
+    "name": "Gipl Developers",
+    "url": "https://github.com/gipldevelopers"
+  },
+  "description": "Forever Security - Comprehensive Cybersecurity Solutions for a Safer Digital World",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gipldevelopers/fs-frontend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gipldevelopers/fs-frontend/issues"
+  },
+  "homepage": "https://foreversecurity.in",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
